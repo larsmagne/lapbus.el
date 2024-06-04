@@ -15,6 +15,7 @@
 
 (defvar lapbus-handlers
   '(("org.freedesktop.UPower.Device" lapbus-warn-power)
+    ("org.freedesktop.UPower" lapbus-mains)
     ("org.freedesktop.login1.Manager" lapbus-lid)
     ("org.bluez.MediaControl1" lapbus-speaker))
   "Alist of DBus property names and handler for those properties.")
@@ -66,6 +67,16 @@
 	   (< lapbus--prev-power low))
       (call-process "brightnessctl" nil nil nil "s" "400")))
     (setq lapbus--prev-power percentage)))
+
+(defun lapbus-mains (value)
+  "This function stops warning about low power when plugged into the mains."
+  (when-let ((low lapbus-low-power-percentage)
+	     (mval (cadr (assoc "OnBattery" value))))
+    ;; Plugged in.
+    (when (and (car mval)
+	       (< lapbus--prev-power low))
+      (call-process "brightnessctl" nil nil nil "s" "400")
+      (setq lapbus--prev-power 100))))
 
 (defun lapbus-lid (value)
   "This function switches the screen on/off if you open/close the lid."
