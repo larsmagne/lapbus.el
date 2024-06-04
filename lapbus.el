@@ -19,6 +19,9 @@
     ("org.bluez.MediaControl1" lapbus-speaker))
   "Alist of DBus property names and handler for those properties.")
 
+(defvar lapbus-debug t
+  "If non-nil, say what each event is in the *lapbus* buffer.")
+
 (defun lapbus-setup ()
   "Start listening for DBus properties, and dispatch to `lapbus-handlers'."
   (interactive)
@@ -27,22 +30,40 @@
    #'lapbus--handle))
 
 (defun lapbus--handle (name value _unused)
+  (when lapbus-debug
+    (with-current-buffer (get-buffer-create "*lapbus*")
+      (save-excursion
+	(goto-char (point-max))
+	(ensure-empty-lines)
+	(insert name ": \n")
+	(dolist (elem value)
+	  (insert "  " (pop elem) ": ")
+	  (if (and (consp (car elem))
+		   (length= (car elem) 1))
+	      (insert (format "%S" (caar elem)))
+	    (insert (format "%S" (car elem))))
+	  (insert "\n"))
+	(ensure-empty-lines))))
   ;; Do a full loop instead of an `assoc' since there may be several
   ;; handlers for the same name.
   (cl-loop for (hname func) in lapbus-handlers
 	   when (equal hname name)
 	   do (funcall func value)))
 
+(defvar lapbus-low-power-percentage 5
+  "If power is less than this, dim the screen as a warning.")
+
 (defvar lapbus--prev-power 100)
 (defun lapbus-warn-power (value)
   "This function warns you when the battery power is below a certain percentage."
-  (when-let ((percentage (caadr (assoc "Percentage" value))))
+  (when-let ((low lapbus-low-power-percentage)
+	     (percentage (caadr (assoc "Percentage" value))))
     (cond
-     ((and (< percentage 5)
-	   (> lapbus--prev-power 5))
+     ((and (< percentage low)
+	   (> lapbus--prev-power low))
       (call-process "brightnessctl" nil nil nil "s" "200"))
-     ((and (> percentage 5)
-	   (< lapbus--prev-power 5))
+     ((and (> percentage low)
+	   (< lapbus--prev-power low))
       (call-process "brightnessctl" nil nil nil "s" "400")))
     (setq lapbus--prev-power percentage)))
 
