@@ -1,0 +1,5 @@
+This tiny package demonstrates how to listen to Dbus signals in a
+convenient way from Emacs.  The utility functions are geared towards
+my specific use cases, but I think the simple framework can easily
+used as a template to achieve whatever actions you want to have happen
+when reacting to Dbus events in Emacs.
