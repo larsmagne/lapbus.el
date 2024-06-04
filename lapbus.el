@@ -33,10 +33,18 @@
 	   when (equal hname name)
 	   do (funcall func value)))
 
+(defvar lapbus--prev-power 100)
 (defun lapbus-warn-power (value)
   "This function warns you when the battery power is below a certain percentage."
   (when-let ((percentage (caadr (assoc "Percentage" value))))
-    (message "Percentage: %s" percentage)))
+    (cond
+     ((and (< percentage 5)
+	   (> lapbus--prev-power 5))
+      (call-process "brightnessctl" nil nil nil "s" "200"))
+     ((and (> percentage 5)
+	   (< lapbus--prev-power 5))
+      (call-process "brightnessctl" nil nil nil "s" "400")))
+    (setq lapbus--prev-power percentage)))
 
 (defun lapbus-lid (value)
   "This function switches the screen on/off if you open/close the lid."
