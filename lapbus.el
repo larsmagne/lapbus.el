@@ -94,8 +94,10 @@
 (defun lapbus-speaker (value)
   "This function un/pauses the music player when a bluetooth player dis/connects."
   (when-let ((mval (cadr (assoc "Connected" value))))
-    (call-process
-     "emacsclient" nil nil nil
+    (start-process
+     "emacsclient" nil
+     "~/src/emacs/trunk/lib-src/emacsclient" 
+     "-s" "jukebox"
      "--eval" (format "(jukebox-%s-play)"
 		      ;; It's connected.
 		      (if (car mval)
