@@ -1,4 +1,4 @@
-;;; lapbus.el --- react to various lapstuff annoyances -*- lexical-binding: t -*-
+;;; lapbus.el --- react to various laptop annoyances -*- lexical-binding: t -*-
 ;; Copyright (C) 2024 Lars Magne Ingebrigtsen
 
 ;; Author: Lars Magne Ingebrigtsen <larsi@gnus.org>
