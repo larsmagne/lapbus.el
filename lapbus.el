@@ -81,6 +81,7 @@
 (defun lapbus-lid (value)
   "This function switches the screen on/off if you open/close the lid."
   (when-let ((mval (cadr (assoc "LidClosed" value))))
+    ;; Switch the screen on/off.
     (call-process
      "gdbus" nil nil nil
      "call" "--session" "--dest" "org.gnome.ScreenSaver"
@@ -89,7 +90,15 @@
      ;; Lid is closed.
      (if (car mval)
 	 "true"
-       "false"))))
+       "false"))
+    ;; Adjust the power profile.
+    (call-process
+     "powerprofilesctl" nil nil nil
+     "set"
+     ;; Lid is closed.
+     (if (car mval)
+	 "power-saver"
+       "balanced"))))
 
 (defun lapbus-speaker (value)
   "This function un/pauses the music player when a bluetooth player dis/connects."
