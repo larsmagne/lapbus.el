@@ -91,6 +91,12 @@
      (if (car mval)
 	 "1"
        "0"))
+    (unless (car mval)
+      (call-process
+       "gdbus" nil nil nil
+       "call" "--session" "--dest" "org.gnome.ScreenSaver"
+       "--object-path" "/org/gnome/ScreenSaver"
+       "--method" "org.gnome.ScreenSaver.SetActive" "0"))
     ;; Adjust the power profile.
     (call-process
      "powerprofilesctl" nil nil nil
