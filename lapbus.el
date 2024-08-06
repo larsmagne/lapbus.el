@@ -30,7 +30,7 @@
    :system nil nil "org.freedesktop.DBus.Properties" "PropertiesChanged"
    #'lapbus--handle))
 
-(defun lapbus--handle (name value _unused)
+(defun lapbus--handle (name value &optional _unused)
   (when lapbus-debug
     (with-current-buffer (get-buffer-create "*lapbus*")
       (save-excursion
@@ -83,14 +83,14 @@
   (when-let ((mval (cadr (assoc "LidClosed" value))))
     ;; Switch the screen on/off.
     (call-process
-     "gdbus" nil nil nil
-     "call" "--session" "--dest" "org.gnome.ScreenSaver"
-     "--object-path" "/org/gnome/ScreenSaver"
-     "--method" "org.gnome.ScreenSaver.SetActive"
+     "busctl" nil nil nil
+     "--user" "set-property" "org.gnome.Mutter.DisplayConfig"
+     "/org/gnome/Mutter/DisplayConfig" "org.gnome.Mutter.DisplayConfig"
+     "PowerSaveMode" "i"
      ;; Lid is closed.
      (if (car mval)
-	 "true"
-       "false"))
+	 "1"
+       "0"))
     ;; Adjust the power profile.
     (call-process
      "powerprofilesctl" nil nil nil
@@ -98,7 +98,7 @@
      ;; Lid is closed.
      (if (car mval)
 	 "power-saver"
-       "balanced"))))
+       "performance"))))
 
 (defun lapbus-speaker (value)
   "This function un/pauses the music player when a bluetooth player dis/connects."
