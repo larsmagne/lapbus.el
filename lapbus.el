@@ -68,10 +68,12 @@
       (call-process "brightnessctl" nil nil nil "s" "400")))
     (setq lapbus--prev-power percentage)))
 
+(defvar lapbus--on-mains nil)
 (defun lapbus-mains (value)
   "This function stops warning about low power when plugged into the mains."
   (when-let ((low lapbus-low-power-percentage)
 	     (mval (cadr (assoc "OnBattery" value))))
+    (setq lapbus--on-mains (not (car mval)))
     ;; Plugged in.
     (when (and (car mval)
 	       (< lapbus--prev-power low))
@@ -98,13 +100,14 @@
        "--object-path" "/org/gnome/ScreenSaver"
        "--method" "org.gnome.ScreenSaver.SetActive" "0"))
     ;; Adjust the power profile.
-    (call-process
-     "powerprofilesctl" nil nil nil
-     "set"
-     ;; Lid is closed.
-     (if (car mval)
-	 "power-saver"
-       "performance"))))
+    (unless lapbus--on-mains
+      (call-process
+       "powerprofilesctl" nil nil nil
+       "set"
+       ;; Lid is closed.
+       (if (car mval)
+	   "power-saver"
+	 "performance")))))
 
 (defun lapbus-speaker (value)
   "This function un/pauses the music player when a bluetooth player dis/connects."
