@@ -100,14 +100,14 @@
        "--object-path" "/org/gnome/ScreenSaver"
        "--method" "org.gnome.ScreenSaver.SetActive" "0"))
     ;; Adjust the power profile.
-    (unless lapbus--on-mains
-      (call-process
-       "powerprofilesctl" nil nil nil
-       "set"
-       ;; Lid is closed.
-       (if (car mval)
-	   "power-saver"
-	 "performance")))))
+    (call-process
+     "powerprofilesctl" nil nil nil
+     "set"
+     ;; Lid is closed.
+     (if (and (car mval)
+	      (not lapbus--on-mains))
+	 "power-saver"
+       "performance"))))
 
 (defun lapbus-speaker (value)
   "This function un/pauses the music player when a bluetooth player dis/connects."
