@@ -33,6 +33,7 @@
 (defun lapbus--handle (name value &optional _unused)
   (when lapbus-debug
     (with-current-buffer (get-buffer-create "*lapbus*")
+      (buffer-disable-undo)
       (save-excursion
 	(goto-char (point-max))
 	(ensure-empty-lines)
